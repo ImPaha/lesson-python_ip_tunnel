@@ -7,6 +7,24 @@ import ipaddress
 import json
 import socket
 
+class Config:
+    def __init__(self, data):
+        if data['mode'] == 'server':
+            self.is_server = True
+        elif data['mode'] == 'client':
+            self.is_server = False
+        else:
+            raise RuntimeError('invalid mode "%s"' % data['mode'])
+
+        self.address = data['address']
+        self.port    = data['port']
+
+        self.iface_name    = data['iface_name']
+        self.iface_addr    = data['iface_addr']
+        self.iface_dstaddr = data['iface_dstaddr']
+        self.iface_netmask = data['iface_netmask']
+        self.iface_mtu     = data['iface_mtu']
+
 class IpPacket:
     def __init__(self, header, body):
         self.header = header
@@ -35,27 +53,22 @@ def main():
     config_filename = sys.argv[1]
 
     with open(config_filename) as config_file:
-        config = json.load(config_file)
+        config = Config(json.load(config_file))
 
     tun_iface = pytun.TunTapDevice()
 
     print(tun_iface.name)
 
-    tun_iface.addr    = config['iface_addr']
-    tun_iface.dstaddr = config['iface_dstaddr']
-    tun_iface.netmask = config['iface_netmask']
-    tun_iface.mtu     = config['iface_mtu']
+    tun_iface.addr    = config.iface_addr
+    tun_iface.dstaddr = config.iface_dstaddr
+    tun_iface.netmask = config.iface_netmask
+    tun_iface.mtu     = config.iface_mtu
 
     tun_iface.up()
 
-    addr_and_port = (config['address'], config['port'])
+    addr_and_port = (config.address, config.port)
 
-    if config['mode'] == 'client':
-        conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print('connecting to %s, port %s' % addr_and_port)
-        conn.connect(addr_and_port)
-        print('connected!')
-    elif config['mode'] == 'server':
+    if config.is_server:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         print('binding to %s, port %s' % addr_and_port)
         sock.bind(addr_and_port)
@@ -63,8 +76,12 @@ def main():
         print('waiting for incoming connection')
         conn, client_addr = sock.accept()
         print('accepted incoming connection from %s' % client_addr[0])
+
     else:
-        raise RuntimeError('invalid mode "%s"' % config['mode'])
+        conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        print('connecting to %s, port %s' % addr_and_port)
+        conn.connect(addr_and_port)
+        print('connected!')
 
     while True:
         buf = tun_iface.read(tun_iface.mtu)
