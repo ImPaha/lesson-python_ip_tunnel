@@ -33,6 +33,9 @@ class IpPacket:
         self.header = header
         self.body = body
 
+    def to_byte_string(self):
+        return self.header.to_byte_string() + self.body
+
 class IpHeader:
     def __init__(self, raw):
         self.ver_ihl, \
@@ -125,10 +128,19 @@ def handle_ip_packet(ip_packet, conn, tun_iface, config):
         'len: %d' % ip_packet.header.total_length,
     )
 
+    ip_packet_packed = ip_packet.to_byte_string()
+    ip_packet_length = struct.pack('>I', len(ip_packet_packed))
+
+    buf = MAGIC + ip_packet_length + ip_packet_packed
+
     if ip_packet.header.dst == config.iface_addr:
-        pass
+        print('sending to tun iface')
+        tun_iface.write(buf)
     elif ip_packet.header.dst == config.iface_dstaddr:
-        pass
+        print('sending to remote peer')
+        conn.send(buf)
+    else:
+        print('unknown destination, doing nothing')
 
 if __name__ == '__main__':
     main()
