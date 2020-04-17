@@ -79,11 +79,11 @@ def main():
     with open(config_filename) as config_file:
         config = Config(json.load(config_file))
 
-    tun_iface = pytun.TunTapDevice()
-
     print('TUN interface addr:     ', config.iface_addr)
     print('TUN interface dest addr:', config.iface_dstaddr)
-    print('TUN interface name:     ', tun_iface.name)
+    print('TUN interface name:     ', config.iface_name)
+
+    tun_iface = pytun.TunTapDevice(name=config.iface_name)
 
     tun_iface.addr    = str(config.iface_addr)
     tun_iface.dstaddr = str(config.iface_dstaddr)
