@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
+import sys
 import pytun
 import struct
 import ipaddress
+import json
 
 class IpHeader:
     def __init__(self, raw):
@@ -24,6 +26,11 @@ class IpHeader:
         self.dst = ipaddress.IPv4Address(dst)
 
 def main():
+    config_filename = sys.argv[1]
+
+    with open(config_filename) as config_file:
+        config = json.load(config_file)
+
     tun_iface = pytun.TunTapDevice()
 
     print(tun_iface.name)
