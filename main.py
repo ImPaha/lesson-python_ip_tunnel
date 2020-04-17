@@ -35,10 +35,10 @@ def main():
 
     print(tun_iface.name)
 
-    tun_iface.addr = '10.0.0.1'
-    tun_iface.dstaddr = '10.0.0.2'
-    tun_iface.netmask = '255.255.255.0'
-    tun_iface.mtu = 1500
+    tun_iface.addr    = config['iface_addr']
+    tun_iface.dstaddr = config['iface_dstaddr']
+    tun_iface.netmask = config['iface_netmask']
+    tun_iface.mtu     = config['iface_mtu']
 
     tun_iface.up()
 
