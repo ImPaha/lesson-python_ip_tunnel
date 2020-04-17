@@ -7,6 +7,8 @@ import ipaddress
 import json
 import socket
 
+MAGIC = b'\x16\xd9\x6b\x52'
+
 class Config:
     def __init__(self, data):
         if data['mode'] == 'server':
@@ -49,6 +51,24 @@ class IpHeader:
 
         self.src = ipaddress.IPv4Address(src)
         self.dst = ipaddress.IPv4Address(dst)
+
+    def to_byte_string(self):
+        return struct.pack(
+            '>BBHHHBBH4s4sHBB',
+            self.ver_ihl,
+            self.tos,
+            self.total_length,
+            self.ident,
+            self.flags_fragoffset,
+            self.ttl,
+            self.proto,
+            self.chksum,
+            self.src.packed,
+            self.dst.packed,
+            self.opt1,
+            self.opt2,
+            self.pad,
+        )
 
 def main():
     config_filename = sys.argv[1]
@@ -104,6 +124,11 @@ def handle_ip_packet(ip_packet, conn, tun_iface, config):
         ip_packet.header.dst,
         'len: %d' % ip_packet.header.total_length,
     )
+
+    if ip_packet.header.dst == config.iface_addr:
+        pass
+    elif ip_packet.header.dst == config.iface_dstaddr:
+        pass
 
 if __name__ == '__main__':
     main()
