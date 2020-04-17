@@ -81,7 +81,9 @@ def main():
 
     tun_iface = pytun.TunTapDevice()
 
-    print(tun_iface.name)
+    print('TUN interface addr:     ', config.iface_addr)
+    print('TUN interface dest addr:', config.iface_dstaddr)
+    print('TUN interface name:     ', tun_iface.name)
 
     tun_iface.addr    = str(config.iface_addr)
     tun_iface.dstaddr = str(config.iface_dstaddr)
@@ -150,6 +152,7 @@ def handle_stream_data(conn, tun_iface, config):
         handle_ip_packet(ip_packet, conn, tun_iface, config)
 
 def handle_ip_packet(ip_packet, conn, tun_iface, config):
+    print('-' * 100)
     print(
         ip_packet.header.src,
         '→',
