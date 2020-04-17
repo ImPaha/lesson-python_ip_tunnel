@@ -6,6 +6,7 @@ import struct
 import ipaddress
 import json
 import socket
+import os
 
 MAGIC = b'\x16\xd9\x6b\x52'
 IP_V4_PROTO = b'\x08\x00'
@@ -110,12 +111,18 @@ def main():
         conn.connect(addr_and_port)
         print('connected!')
 
+    conn.setblocking(0)
+    os.set_blocking(tun_iface.fileno(), False)
+
     while True:
         handle_iface_data(conn, tun_iface, config)
         handle_stream_data(conn, tun_iface, config)
 
 def handle_iface_data(conn, tun_iface, config):
-    buf = tun_iface.read(tun_iface.mtu)
+    try:
+        buf = tun_iface.read(tun_iface.mtu)
+    except:
+        return
 
     flags = buf[:2]
     proto = buf[2:4]
@@ -128,8 +135,6 @@ def handle_iface_data(conn, tun_iface, config):
     handle_ip_packet(ip_packet, conn, tun_iface, config)
 
 def handle_stream_data(conn, tun_iface, config):
-    conn.setblocking(0)
-
     try:
         data = conn.recv(10000)
     except:
@@ -174,7 +179,6 @@ def handle_ip_packet(ip_packet, conn, tun_iface, config):
         print('sending to remote peer')
         ip_packet_length = struct.pack('>I', len(ip_packet_packed))
         buf = MAGIC + ip_packet_length + ip_packet_packed
-        conn.setblocking(1)
         conn.sendall(buf)
     else:
         print('unknown destination, doing nothing')
