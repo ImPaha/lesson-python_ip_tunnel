@@ -8,6 +8,7 @@ import json
 import socket
 
 MAGIC = b'\x16\xd9\x6b\x52'
+IP_V4_PROTO = b'\x08\x00'
 
 class Config:
     def __init__(self, data):
@@ -119,7 +120,7 @@ def handle_iface_data(conn, tun_iface, config):
     flags = buf[:2]
     proto = buf[2:4]
 
-    if proto != b'\x08\x00':
+    if proto != IP_V4_PROTO:
         return
 
     ip_packet = IpPacket(IpHeader(buf[4:28]), buf[28:])
@@ -161,18 +162,18 @@ def handle_ip_packet(ip_packet, conn, tun_iface, config):
     )
 
     ip_packet_packed = ip_packet.to_byte_string()
-    ip_packet_length = struct.pack('>I', len(ip_packet_packed))
 
     if len(ip_packet_packed) != ip_packet.header.total_length:
         raise RuntimeError('invalid "total length" header value')
 
-    buf = MAGIC + ip_packet_length + ip_packet_packed
-
     if ip_packet.header.dst == config.iface_addr:
         print('sending to tun iface')
+        buf = b'\x00\x00' + IP_V4_PROTO + ip_packet_packed
         tun_iface.write(buf)
     elif ip_packet.header.dst == config.iface_dstaddr:
         print('sending to remote peer')
+        ip_packet_length = struct.pack('>I', len(ip_packet_packed))
+        buf = MAGIC + ip_packet_length + ip_packet_packed
         conn.setblocking(1)
         conn.sendall(buf)
     else:
