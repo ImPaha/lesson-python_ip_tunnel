@@ -1,0 +1,7 @@
+{
+  "mode": "client",
+  "address": "127.0.0.1",
+  "port": 12345,
+  "iface_name": "tun0",
+  "iface_mtu": 1500
+}
