@@ -7,6 +7,11 @@ import ipaddress
 import json
 import socket
 
+class IpPacket:
+    def __init__(self, header, body):
+        self.header = header
+        self.body = body
+
 class IpHeader:
     def __init__(self, raw):
         self.ver_ihl, \
@@ -70,11 +75,17 @@ def main():
         if proto != b'\x08\x00':
             continue
 
-        ip_header = IpHeader(buf[4:28])
-        body = buf[28:]
+        ip_packet = IpPacket(IpHeader(buf[4:28]), buf[28:])
 
-        print(ip_header.src, '→', ip_header.dst, 'len: %d' % ip_header.total_length)
+        handle_ip_packet(ip_packet, conn, tun_iface, config)
 
+def handle_ip_packet(ip_packet, conn, tun_iface, config):
+    print(
+        ip_packet.header.src,
+        '→',
+        ip_packet.header.dst,
+        'len: %d' % ip_packet.header.total_length,
+    )
 
 if __name__ == '__main__':
     main()
