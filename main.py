@@ -160,6 +160,9 @@ def handle_ip_packet(ip_packet, conn, tun_iface, config):
     ip_packet_packed = ip_packet.to_byte_string()
     ip_packet_length = struct.pack('>I', len(ip_packet_packed))
 
+    if len(ip_packet_packed) != ip_packet.header.total_length:
+        raise RuntimeError('invalid "total length" header value')
+
     buf = MAGIC + ip_packet_length + ip_packet_packed
 
     if ip_packet.header.dst == config.iface_addr:
