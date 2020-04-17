@@ -125,7 +125,29 @@ def handle_iface_data(conn, tun_iface, config):
     handle_ip_packet(ip_packet, conn, tun_iface, config)
 
 def handle_stream_data(conn, tun_iface, config):
-    data = conn.recv(10000)
+    conn.setblocking(0)
+
+    try:
+        data = conn.recv(10000)
+    except:
+        return
+
+    while data != b'':
+        if data[0:4] != MAGIC:
+            raise RuntimeError('invalid magic number')
+
+        ip_packet_length = struct.unpack('>I', data[4:8])[0]
+
+        if len(data) < ip_packet_length + 8:
+            raise RuntimeError('not enough data')
+
+        ip_packet_packed = data[8:8 + ip_packet_length]
+
+        data = data[8 + ip_packet_length:]
+
+        ip_packet = IpPacket(IpHeader(ip_packet_packed[:24]), ip_packet_packed[24:])
+
+        handle_ip_packet(ip_packet, conn, tun_iface, config)
 
 def handle_ip_packet(ip_packet, conn, tun_iface, config):
     print(
@@ -145,7 +167,8 @@ def handle_ip_packet(ip_packet, conn, tun_iface, config):
         tun_iface.write(buf)
     elif ip_packet.header.dst == config.iface_dstaddr:
         print('sending to remote peer')
-        conn.send(buf)
+        conn.setblocking(1)
+        conn.sendall(buf)
     else:
         print('unknown destination, doing nothing')
 
