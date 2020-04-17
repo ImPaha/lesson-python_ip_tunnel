@@ -20,10 +20,11 @@ class Config:
         self.port    = data['port']
 
         self.iface_name    = data['iface_name']
-        self.iface_addr    = data['iface_addr']
-        self.iface_dstaddr = data['iface_dstaddr']
         self.iface_netmask = data['iface_netmask']
         self.iface_mtu     = data['iface_mtu']
+
+        self.iface_addr    = ipaddress.IPv4Address(data['iface_addr'])
+        self.iface_dstaddr = ipaddress.IPv4Address(data['iface_dstaddr'])
 
 class IpPacket:
     def __init__(self, header, body):
@@ -59,8 +60,8 @@ def main():
 
     print(tun_iface.name)
 
-    tun_iface.addr    = config.iface_addr
-    tun_iface.dstaddr = config.iface_dstaddr
+    tun_iface.addr    = str(config.iface_addr)
+    tun_iface.dstaddr = str(config.iface_dstaddr)
     tun_iface.netmask = config.iface_netmask
     tun_iface.mtu     = config.iface_mtu
 
