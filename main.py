@@ -108,17 +108,24 @@ def main():
         print('connected!')
 
     while True:
-        buf = tun_iface.read(tun_iface.mtu)
+        handle_iface_data(conn, tun_iface, config)
+        handle_stream_data(conn, tun_iface, config)
 
-        flags = buf[:2]
-        proto = buf[2:4]
+def handle_iface_data(conn, tun_iface, config):
+    buf = tun_iface.read(tun_iface.mtu)
 
-        if proto != b'\x08\x00':
-            continue
+    flags = buf[:2]
+    proto = buf[2:4]
 
-        ip_packet = IpPacket(IpHeader(buf[4:28]), buf[28:])
+    if proto != b'\x08\x00':
+        return
 
-        handle_ip_packet(ip_packet, conn, tun_iface, config)
+    ip_packet = IpPacket(IpHeader(buf[4:28]), buf[28:])
+
+    handle_ip_packet(ip_packet, conn, tun_iface, config)
+
+def handle_stream_data(conn, tun_iface, config):
+    data = conn.recv(10000)
 
 def handle_ip_packet(ip_packet, conn, tun_iface, config):
     print(
