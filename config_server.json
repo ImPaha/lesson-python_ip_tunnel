@@ -1,10 +1,10 @@
 {
   "mode": "server",
-  "address": "0.0.0.0",
+  "address": "192.168.1.11",
   "port": 12345,
   "iface_name": "tun1",
   "iface_mtu": 1500,
-  "iface_addr": "10.0.0.2",
-  "iface_dstaddr": "10.0.0.1",
+  "iface_addr": "10.0.0.1",
+  "iface_dstaddr": "10.0.0.2",
   "iface_netmask": "255.255.255.0"
 }

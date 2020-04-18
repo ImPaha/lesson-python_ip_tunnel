@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -e
+
+ROOT="$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" >/dev/null 2>&1 && pwd)"
+
+. "$ROOT/test/const.sh"
+
+ip netns exec "$CLIENT_NAMESPACE" curl "http://$HTTP_ADDR:$HTTP_PORT"

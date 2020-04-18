@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -e
+
+ROOT="$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" >/dev/null 2>&1 && pwd)"
+
+. "$ROOT/test/const.sh"
+
+ip netns exec "$SERVER_NAMESPACE" socat "TCP-LISTEN:$HTTP_PORT,fork,crlf" \
+  SYSTEM:'echo "HTTP/1.0 200"; echo "Content-Type: text/plain"; echo; echo "Hello, World!"'

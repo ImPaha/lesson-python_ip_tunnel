@@ -1,0 +1,14 @@
+#!/bin/bash
+
+set -e
+
+ROOT="$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" >/dev/null 2>&1 && pwd)"
+
+. "$ROOT/test/const.sh"
+
+ip link del "$BRIDGE_IFACE_NAME"
+ip link del "$SERVER_BR_VETH_IFACE_NAME"
+ip link del "$CLIENT_BR_VETH_IFACE_NAME"
+
+ip netns delete "$SERVER_NAMESPACE"
+ip netns delete "$CLIENT_NAMESPACE"

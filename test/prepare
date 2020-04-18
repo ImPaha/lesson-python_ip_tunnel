@@ -1,0 +1,32 @@
+#!/bin/bash
+
+set -e
+
+ROOT="$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" >/dev/null 2>&1 && pwd)"
+
+. "$ROOT/test/const.sh"
+
+ip netns add "$SERVER_NAMESPACE"
+ip netns add "$CLIENT_NAMESPACE"
+
+ip link add "$SERVER_VETH_IFACE_NAME" type veth peer name "$SERVER_BR_VETH_IFACE_NAME"
+ip link add "$CLIENT_VETH_IFACE_NAME" type veth peer name "$CLIENT_BR_VETH_IFACE_NAME"
+
+ip link set "$SERVER_VETH_IFACE_NAME" netns "$SERVER_NAMESPACE"
+ip link set "$CLIENT_VETH_IFACE_NAME" netns "$CLIENT_NAMESPACE"
+
+ip netns exec "$SERVER_NAMESPACE" ip addr add "$SERVER_ADDR" dev "$SERVER_VETH_IFACE_NAME"
+ip netns exec "$CLIENT_NAMESPACE" ip addr add "$CLIENT_ADDR" dev "$CLIENT_VETH_IFACE_NAME"
+
+ip link add name "$BRIDGE_IFACE_NAME" type bridge
+
+ip link set "$BRIDGE_IFACE_NAME" up
+ip link set "$SERVER_BR_VETH_IFACE_NAME" up
+ip link set "$CLIENT_BR_VETH_IFACE_NAME" up
+ip netns exec "$SERVER_NAMESPACE" ip link set "$SERVER_VETH_IFACE_NAME" up
+ip netns exec "$CLIENT_NAMESPACE" ip link set "$CLIENT_VETH_IFACE_NAME" up
+
+ip link set "$SERVER_BR_VETH_IFACE_NAME" master "$BRIDGE_IFACE_NAME"
+ip link set "$CLIENT_BR_VETH_IFACE_NAME" master "$BRIDGE_IFACE_NAME"
+
+ip addr add "$BRIDGE_ADDR" brd + dev "$BRIDGE_IFACE_NAME"
