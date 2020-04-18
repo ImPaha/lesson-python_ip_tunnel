@@ -1,4 +1,6 @@
-protoloop
-=========
+IP-туннель (VPN) с tun-интерфейсом на Python
+============================================
 
-IP-tunnel (VPN) with "tun" interface.
+Данный код был написан в рамках трансляции
+(https://www.youtube.com/watch?v=tgXV1h_YMu4)
+и будет доработан позже.
