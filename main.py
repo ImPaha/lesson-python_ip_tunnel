@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
-import sys
-import pytun
-import struct
 import ipaddress
 import json
-import socket
 import os
+import socket
+import struct
+import sys
+
+import pytun
 
 MAGIC = b'\x16\xd9\x6b\x52'
 IP_V4_PROTO = b'\x08\x00'
