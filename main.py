@@ -175,7 +175,9 @@ def handle_ip_packet(ip_packet, conn, tun_iface, config):
     if ip_packet.header.dst == config.iface_addr:
         print('sending to tun iface')
         buf = b'\x00\x00' + IP_V4_PROTO + ip_packet_packed
-        tun_iface.write(buf)
+        while len(buf):
+            nbytes = tun_iface.write(buf)
+            buf = buf[nbytes:]
     elif ip_packet.header.dst == config.iface_dstaddr:
         print('sending to remote peer')
         ip_packet_length = struct.pack('>I', len(ip_packet_packed))

@@ -2,8 +2,7 @@ IP-туннель (VPN) с tun-интерфейсом на Python
 ============================================
 
 Данный код был написан в рамках трансляции
-(https://www.youtube.com/watch?v=tgXV1h_YMu4)
-и будет доработан позже.
+(https://www.youtube.com/watch?v=tgXV1h_YMu4).
 
 
 
